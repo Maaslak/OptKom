@@ -13,7 +13,7 @@ const int population_size=100;
 int n,m; //n - liczba operacji, m - liczba maszyn
 vector <int*> population;
 int** machines,** optime;
-const int T=3000, tsize=10, ksize=10;
+const int T=30000, tsize=10, ksize=10;
 int start,koniec;
 
 void Read1(){
@@ -173,41 +173,37 @@ void GeneticAlgorithm(){
                 i++;
             }
         }
-
-
-
-
-        // Krzyzowanie cdn...
-        for(i=0;i<ksize;i++)
+        for(i=0;i<ksize-1;i++)
         {
             int* chromosome1=new int[n*m];
             int* chromosome2=new int[n*m];
             //cout << "miash\n";
             int miejsce;
-            do
-            miejsce=(rand()%10)*10;
-            while(miejsce==0);
+            //cout<<m<<' ';
+            miejsce=(rand() % n)*m;
+            //cout<<miejsce<<' ';
             for(int j=0;j<miejsce;j++)
             {
-                chromosome1[j]=population[i][j];
-                chromosome2[j]=population[i+1][j];
+                chromosome1[j]=population[knames[i]][j];
+                chromosome2[j]=population[knames[i+1]][j];
             }
+            //cout<<"spoko";
             for(int j=miejsce;j<n*m;j++)
             {
-                chromosome1[j]=population[i+1][j];
-                chromosome2[j]=population[i][j];
+                chromosome1[j]=population[knames[i+1]][j];
+                chromosome2[j]=population[knames[i]][j];
             }
+
             population.push_back(chromosome1);
             population.push_back(chromosome2);
-            i++;
         }
-
-
-
+        //cout<<"spoko";
         sort(population.begin(), population.end(), comp);
         //Wyswietl();
         cout << Time(population[0]) << endl;
-        population.erase(population.begin()+population_size-1,population.end());
+        for(int i=population_size; i<population.size(); i++)
+            delete(population[i]);
+        population.erase(population.begin()+population_size,population.end());
         koniec=clock()-start;
 
         //cout << koniec;
@@ -216,11 +212,12 @@ void GeneticAlgorithm(){
 }
 
 int main(){
-    srand(time(NULL));
+    GeneticAlgorithm();
+    /*srand(time(NULL));
     Read1();
     GeneratePop();
-    //sort(population.begin(), population.end(), comp);
-    Wyswietl();
+    sort(population.begin(), population.end(), comp);
+    Wyswietl();*/
  //GeneticAlgorithm();
  Delete1();
 
