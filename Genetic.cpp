@@ -158,21 +158,46 @@ void GeneticAlgorithm(){
              break;
              }
             }
-            if(czy==false)i++;
-
+            if(czy==false){
+                knames[i]=temp;
+                i++;
+            }
         }
 
 
 
 
         // Krzyzowanie cdn...
-
-
+        for(i=0;i<ksize;i++)
+        {
+            int* chromosome1=new int[n*m];
+            int* chromosome2=new int[n*m];
+            //cout << "miash\n";
+            int miejsce;
+            do
+            miejsce=(rand()%10)*10;
+            while(miejsce==0);
+            for(int j=0;j<miejsce;j++)
+            {
+                chromosome1[j]=population[i][j];
+                chromosome2[j]=population[i+1][j];
+            }
+            for(int j=miejsce;j<n*m;j++)
+            {
+                chromosome1[j]=population[i+1][j];
+                chromosome2[j]=population[i][j];
+            }
+            population.push_back(chromosome1);
+            population.push_back(chromosome2);
+            i++;
+        }
 
 
 
         sort(population.begin(), population.end(), comp);
         //Wyswietl();
+        cout << Time(population[0]) << endl;
+        population.erase(population.begin()+population_size-1,population.end());
         koniec=clock()-start;
 
         //cout << koniec;
@@ -181,7 +206,14 @@ void GeneticAlgorithm(){
 }
 
 int main(){
- GeneticAlgorithm();
+    srand(time(NULL));
+    Read1();
+    GeneratePop();
+    for (int i=0; i<population.size();i++)
+    {
+        cout << Time(population[i]) << " " ;
+    }
+ //GeneticAlgorithm();
  Delete1();
 
  return 0;
