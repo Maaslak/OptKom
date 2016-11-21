@@ -64,9 +64,9 @@ void GeneratePop(){
 }
 
 int Time(int* chr){
- int tabm[m];
+  int tabm[m];
  int tabo[n];
- int ktop[n];
+ int ktop[n], ktozad[m];
  for(int i=0; i<m; i++)
     tabm[i]=0;
  for( int i=0; i<n; i++){
@@ -74,6 +74,8 @@ int Time(int* chr){
     ktop[i]=0;
  }
  while(1){
+    for(int i=0; i<m; i++)
+        ktozad[i]=-1;
     bool czy=true;
     for(int i=0; i<n; i++){
             if(ktop[i]!=m){
@@ -82,29 +84,37 @@ int Time(int* chr){
             }
     }
     if(czy==true)break;
-    for(int i=0; i<m; i++){
-        int op=-1;
-        //cout<<"\n\n"<<i<<"\n\n";
-        for(int j=0; j<n; j++){
+    for(int j=0; j<n; j++){
                 //cout<<j<<'\n';
         if(ktop[j]==m)continue;
-        if(machines[j][ktop[j]]!=i)continue;
-        for(int k=n*i; k<n*i+n; k++){
-            //cout<<"K: "<<k<<" J: "<<j<<'\n';
-          if(chr[k]==op)break;
+        for(int k=n*machines[j][ktop[j]]; k<n*machines[j][ktop[j]]+n; k++){
+            //cout<<"Chr k: "<<chr[k]<<" J: "<<j<<" Ktozad[j]: "<<ktozad[machines[j][ktop[j]]]<<'\n';
+          if(chr[k]==ktozad[machines[j][ktop[j]]])break;
           if(chr[k]==j){
-          op=j;
+          ktozad[machines[j][ktop[j]]]=j;
           break;
           }
          }
-        }
-        //cout<<"Op "<<op<<'\n';
-        if(op==-1)continue;
-        tabm[i]=max(tabm[i], tabo[op])+optime[op][i];
-        tabo[op]=tabm[i];
-        ktop[op]++;
-        //cout<<op<<'\n';
     }
+    //cout<<"OK\n";
+
+    for(int i=0; i<m; i++){
+        //cout<<"Ktzad["<<i<<"]= "<<ktozad[i]<<'\n';
+        //cout<<"OK\n";
+        if(ktozad[i]==-1)continue;
+        //if(ktozad[ktop[i]]>n)continue;
+        //if(ktop[i]==n)continue;
+        tabm[i]=max(tabm[i], tabo[ktozad[i]])+optime[ktozad[i]][ktop[ktozad[i]]];
+        //cout<<tabm[i]<<'\n';
+        tabo[ktozad[i]]=tabm[i];
+        ktop[ktozad[i]]++;
+    }
+    /*for(int i=0; i<m; i++)
+        cout<<"Ktoop["<<i<<"]= "<<ktop[i]<<'\n';
+    for(int i=0; i<n; i++)
+        cout<<"czasy: "<<tabm[i]<<'\n';
+        //cout<<op<<'\n';*/
+
  }
  int maks=0;
  for(int i=0; i<m; i++)
@@ -209,10 +219,8 @@ int main(){
     srand(time(NULL));
     Read1();
     GeneratePop();
-    for (int i=0; i<population.size();i++)
-    {
-        cout << Time(population[i]) << " " ;
-    }
+    //sort(population.begin(), population.end(), comp);
+    Wyswietl();
  //GeneticAlgorithm();
  Delete1();
 
