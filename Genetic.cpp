@@ -9,12 +9,13 @@
 
 using namespace std;
 
-const int population_size=100;
+const int population_size=20;
 int n,m; //n - liczba operacji, m - liczba maszyn
 vector <int*> population;
 int** machines,** optime;
-const int T=3000, tsize=10, ksize=10, czymut=60;
+const int T=6000, tsize=10, ksize=4, czymut=60;
 int start,koniec;
+bool czyTailard=0;
 
 void Read1(){
  scanf("%d %d", &n, &m);
@@ -30,6 +31,72 @@ void Read1(){
             //printf("%d %d ",machines[i][j],optime[i][j]);
     }
  //cout<<"ReadEnd\n";
+}
+
+void ReadTailard(char *a){
+    string slowo;
+    fstream plik;
+    plik.open(a,ios::in);
+
+    if(plik.good()==false)
+    {
+        cout<<"Nie uda³o siê wczytaæ danych!";
+        exit(0);
+    }
+    plik >> n >> m;
+    machines=new int*[n];
+    optime=new int* [n];
+    for(int i=0; i<n; i++){
+            machines[i]=new int [m];
+            optime[i]=new int [m];
+    }
+    do
+        plik >> slowo;
+    while(slowo!="Times");
+    for(int i=0; i<n; i++)
+    for(int j=0;j<m; j++){
+            plik >> optime[i][j];
+            //cout << optime[i][j] << " ";
+            //if (j==m-1)
+               // cout << endl;
+    }
+    //cout << endl;
+    do
+        plik >> slowo;
+    while(slowo!="Machines");
+    for(int i=0; i<n; i++)
+    for(int j=0;j<m; j++){
+            plik >> machines[i][j];
+            machines[i][j]--;
+            //cout << machines[i][j] << " ";
+            //if (j==m-1)
+                //cout << endl;
+    }
+    plik.close();
+}
+
+void ReadBeasley(char *a){
+    fstream plik;
+    plik.open(a,ios::in);
+
+    if(plik.good()==false)
+    {
+        cout<<"Nie uda³o siê wczytaæ danych!";
+        exit(0);
+    }
+    plik >> n >> m;
+    machines=new int*[n];
+    optime=new int* [n];
+    for(int i=0; i<n; i++){
+            machines[i]=new int [m];
+            optime[i]=new int [m];
+    }
+    for(int i=0; i<n; i++)
+    for(int j=0;j<m; j++){
+            plik >> machines[i][j] >> optime[i][j];
+            //cout << machines[i][j] << " " << optime[i][j] << " ";
+    }
+    plik.close();
 }
 
 void Delete1(){
@@ -160,7 +227,6 @@ chr[gdziemasz*n+b]=temp;
 void GeneticAlgorithm(){
     start=clock();
     srand(time(NULL));
-    Read1();
     GeneratePop();
     //cout<<"ok"<<'\n';
     //int i=0;
@@ -199,12 +265,14 @@ void GeneticAlgorithm(){
             {
                 chromosome1[j]=population[knames[i]][j];
                 chromosome2[j]=population[knames[i+1]][j];
+                //j++;
             }
             //cout<<"spoko";
             for(int j=miejsce;j<n*m;j++)
             {
                 chromosome1[j]=population[knames[i+1]][j];
                 chromosome2[j]=population[knames[i]][j];
+                //j++;
             }
             int mut=rand()%100;
             if(mut>=czymut)
@@ -232,15 +300,39 @@ void GeneticAlgorithm(){
     //cout<<i<<'\n';
 }
 
-int main(){
+void ZapiszWynik(char* a){
+    fstream plik;
+    plik.open(a,ios_base::app);
+    plik << " " << population[0][100];
+    plik.close();
+}
+
+int main(int argc, char* argv[]){
+    if(argc>1){
+        if(argv[1][0]=='t' && argv[1][1]=='a' && argv[1][2]=='i')
+        {
+            //cout << "Weszlem";
+            ReadTailard(argv[1]);
+            czyTailard=1;
+        }
+        else
+            ReadBeasley(argv[1]);
     GeneticAlgorithm();
+    Delete1();
+    }
+    else{
+        cout<<"Nie ma parametru\n";
+    }
+
+    //ZapiszWynik(argv[1]);
+
     /*srand(time(NULL));
     Read1();
     GeneratePop();
     sort(population.begin(), population.end(), comp);
     Wyswietl();*/
  //GeneticAlgorithm();
- Delete1();
+
 
  return 0;
 }
