@@ -13,7 +13,7 @@ const int population_size=100;
 int n,m; //n - liczba operacji, m - liczba maszyn
 vector <int*> population;
 int** machines,** optime;
-const int T=3000, tsize=10, ksize=10;
+const int T=3000, tsize=10, ksize=10, czymut=60;
 int start,koniec;
 
 void Read1(){
@@ -27,7 +27,7 @@ void Read1(){
  for(int i=0; i<n; i++)
     for(int j=0;j<m; j++){
             scanf("%d %d ", &machines[i][j],&optime[i][j]);
-            printf("%d %d ",machines[i][j],optime[i][j]);
+            //printf("%d %d ",machines[i][j],optime[i][j]);
     }
  //cout<<"ReadEnd\n";
 }
@@ -150,6 +150,13 @@ int Turniej(){
     return wylosowani[wygr];
 }
 
+void Mutacja(int* chr){
+int gdziemasz=rand()%m, a=rand()%n, b=rand()%n;
+int temp=chr[gdziemasz*n+a];
+chr[gdziemasz*n+a]=chr[gdziemasz*n+b];
+chr[gdziemasz*n+b]=temp;
+}
+
 void GeneticAlgorithm(){
     start=clock();
     srand(time(NULL));
@@ -199,6 +206,12 @@ void GeneticAlgorithm(){
                 chromosome1[j]=population[knames[i+1]][j];
                 chromosome2[j]=population[knames[i]][j];
             }
+            int mut=rand()%100;
+            if(mut>=czymut)
+                Mutacja(chromosome1);
+            mut=rand()%100;
+            if(mut>=czymut)
+                Mutacja(chromosome2);
             chromosome1[n*m]=Time(chromosome1);
             chromosome2[n*m]=Time(chromosome2);
             population.push_back(chromosome1);
@@ -207,7 +220,7 @@ void GeneticAlgorithm(){
         //cout<<"spoko";
         sort(population.begin(), population.end(), comp);
         //Wyswietl();
-        cout << Time(population[0]) << endl;
+        //cout << Time(population[0]) << endl;
         for(int i=population_size; i<population.size(); i++)
             delete(population[i]);
         population.erase(population.begin()+population_size,population.end());
@@ -215,6 +228,7 @@ void GeneticAlgorithm(){
 
         //cout << koniec;
     }
+    cout << Time(population[0]) << endl;
     //cout<<i<<'\n';
 }
 
