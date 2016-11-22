@@ -13,7 +13,7 @@ const int population_size=100;
 int n,m; //n - liczba operacji, m - liczba maszyn
 vector <int*> population;
 int** machines,** optime;
-const int T=30000, tsize=10, ksize=10;
+const int T=3000, tsize=10, ksize=10;
 int start,koniec;
 
 void Read1(){
@@ -27,8 +27,9 @@ void Read1(){
  for(int i=0; i<n; i++)
     for(int j=0;j<m; j++){
             scanf("%d %d ", &machines[i][j],&optime[i][j]);
- //printf("%d %d ",machines[i][j],optime[i][j]);
+            printf("%d %d ",machines[i][j],optime[i][j]);
     }
+ //cout<<"ReadEnd\n";
 }
 
 void Delete1(){
@@ -44,25 +45,6 @@ void Delete1(){
         population.pop_back();
     }
 }
-
-void GeneratePop(){
-  for(int i=0;i<population_size;i++){
-  int* chromosome=new int[n*m];
-  for(int j=0;j<m*n;j++)
-    chromosome[j]=-1;
-  for(int j=0;j<m;j++)
-        for(int k=0;k<n;k++){
-                int r=rand()%n;
-            while (chromosome[j*n+r]!=-1){
-            r=rand()%n;
-            //cout<<k<<" chuj\n";
-            }
-            chromosome[j*n+r]=k;
-        }
-  population.push_back(chromosome);
-  }
-}
-
 int Time(int* chr){
   int tabm[m];
  int tabo[n];
@@ -122,9 +104,30 @@ int Time(int* chr){
  return maks;
 }
 
+void GeneratePop(){
+  for(int i=0;i<population_size;i++){
+  int* chromosome=new int[n*m+1];
+  for(int j=0;j<m*n;j++)
+    chromosome[j]=-1;
+  for(int j=0;j<m;j++)
+        for(int k=0;k<n;k++){
+                int r=rand()%n;
+            while (chromosome[j*n+r]!=-1){
+            r=rand()%n;
+            //cout<<k<<" chuj\n";
+            }
+            chromosome[j*n+r]=k;
+        }
+  chromosome[n*m]=Time(chromosome);
+  population.push_back(chromosome);
+  }
+}
+
+
+
 bool comp(int* l, int* r)
 {
-    return ((Time(l)) <= (Time(r)));
+    return ((l[n*m]) < (r[n*m]));
 }
 
 void Wyswietl(){
@@ -152,14 +155,17 @@ void GeneticAlgorithm(){
     srand(time(NULL));
     Read1();
     GeneratePop();
+    //cout<<"ok"<<'\n';
     //int i=0;
     while(koniec<T)
     {
         //i++;
+        //cout<<"ok\n";
         int knames[ksize];
         int i=0;
         while(i<ksize)
         {
+            //cout<<"ok\n";
             int temp=Turniej();
             bool czy=false;
             for(int j=0;j<i;j++){
@@ -175,12 +181,12 @@ void GeneticAlgorithm(){
         }
         for(i=0;i<ksize-1;i++)
         {
-            int* chromosome1=new int[n*m];
-            int* chromosome2=new int[n*m];
+            int* chromosome1=new int[n*m+1];
+            int* chromosome2=new int[n*m+1];
             //cout << "miash\n";
             int miejsce;
             //cout<<m<<' ';
-            miejsce=(rand() % n)*m;
+            miejsce=(rand() % m)*n;
             //cout<<miejsce<<' ';
             for(int j=0;j<miejsce;j++)
             {
@@ -193,7 +199,8 @@ void GeneticAlgorithm(){
                 chromosome1[j]=population[knames[i+1]][j];
                 chromosome2[j]=population[knames[i]][j];
             }
-
+            chromosome1[n*m]=Time(chromosome1);
+            chromosome2[n*m]=Time(chromosome2);
             population.push_back(chromosome1);
             population.push_back(chromosome2);
         }
