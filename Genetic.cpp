@@ -28,9 +28,7 @@ void Read1(){
  for(int i=0; i<n; i++)
     for(int j=0;j<m; j++){
             scanf("%d %d ", &machines[i][j],&optime[i][j]);
-            //printf("%d %d ",machines[i][j],optime[i][j]);
     }
- //cout<<"ReadEnd\n";
 }
 
 void ReadTailard(char *a){
@@ -56,11 +54,7 @@ void ReadTailard(char *a){
     for(int i=0; i<n; i++)
     for(int j=0;j<m; j++){
             plik >> optime[i][j];
-            //cout << optime[i][j] << " ";
-            //if (j==m-1)
-               // cout << endl;
     }
-    //cout << endl;
     do
         plik >> slowo;
     while(slowo!="Machines");
@@ -68,9 +62,6 @@ void ReadTailard(char *a){
     for(int j=0;j<m; j++){
             plik >> machines[i][j];
             machines[i][j]--;
-            //cout << machines[i][j] << " ";
-            //if (j==m-1)
-                //cout << endl;
     }
     plik.close();
 }
@@ -94,7 +85,6 @@ void ReadBeasley(char *a){
     for(int i=0; i<n; i++)
     for(int j=0;j<m; j++){
             plik >> machines[i][j] >> optime[i][j];
-            //cout << machines[i][j] << " " << optime[i][j] << " ";
     }
     plik.close();
 }
@@ -134,10 +124,9 @@ int Time(int* chr){
     }
     if(czy==true)break;
     for(int j=0; j<n; j++){
-                //cout<<j<<'\n';
         if(ktop[j]==m)continue;
+        if(optime[j][ktop[j]]==0)ktop[j]++;
         for(int k=n*machines[j][ktop[j]]; k<n*machines[j][ktop[j]]+n; k++){
-            //cout<<"Chr k: "<<chr[k]<<" J: "<<j<<" Ktozad[j]: "<<ktozad[machines[j][ktop[j]]]<<'\n';
           if(chr[k]==ktozad[machines[j][ktop[j]]])break;
           if(chr[k]==j){
           ktozad[machines[j][ktop[j]]]=j;
@@ -145,30 +134,75 @@ int Time(int* chr){
           }
          }
     }
-    //cout<<"OK\n";
 
     for(int i=0; i<m; i++){
-        //cout<<"Ktzad["<<i<<"]= "<<ktozad[i]<<'\n';
-        //cout<<"OK\n";
         if(ktozad[i]==-1)continue;
-        //if(ktozad[ktop[i]]>n)continue;
-        //if(ktop[i]==n)continue;
         tabm[i]=max(tabm[i], tabo[ktozad[i]])+optime[ktozad[i]][ktop[ktozad[i]]];
-        //cout<<tabm[i]<<'\n';
         tabo[ktozad[i]]=tabm[i];
         ktop[ktozad[i]]++;
     }
-    /*for(int i=0; i<m; i++)
-        cout<<"Ktoop["<<i<<"]= "<<ktop[i]<<'\n';
-    for(int i=0; i<n; i++)
-        cout<<"czasy: "<<tabm[i]<<'\n';
-        //cout<<op<<'\n';*/
 
  }
  int maks=0;
  for(int i=0; i<m; i++)
     if(tabm[i]>maks)maks=tabm[i];
  return maks;
+}
+
+void Result(int* chr){
+int result[n][m];
+for(int i=0; i<n; i++)
+        for(int j=0; j<m; j++)
+            result[i][j]=0;
+int tabm[m];
+ int tabo[n];
+ int ktop[n], ktozad[m];
+ for(int i=0; i<m; i++)
+    tabm[i]=0;
+ for( int i=0; i<n; i++){
+    tabo[i]=0;
+    ktop[i]=0;
+ }
+ while(1){
+    for(int i=0; i<m; i++)
+        ktozad[i]=-1;
+    bool czy=true;
+    for(int i=0; i<n; i++){
+            if(ktop[i]!=m){
+             czy=false;
+             break;
+            }
+    }
+    if(czy==true)break;
+    for(int j=0; j<n; j++){
+        if(ktop[j]==m)continue;
+        if(optime[j][ktop[j]]==0)ktop[j]++;
+        for(int k=n*machines[j][ktop[j]]; k<n*machines[j][ktop[j]]+n; k++){
+          if(chr[k]==ktozad[machines[j][ktop[j]]])break;
+          if(chr[k]==j){
+          ktozad[machines[j][ktop[j]]]=j;
+          break;
+          }
+         }
+    }
+
+    for(int i=0; i<m; i++){
+        if(ktozad[i]==-1)continue;
+        result[ktozad[i]][ktop[ktozad[i]]]=max(tabm[i], tabo[ktozad[i]]);
+        tabm[i]=max(tabm[i], tabo[ktozad[i]])+optime[ktozad[i]][ktop[ktozad[i]]];
+        tabo[ktozad[i]]=tabm[i];
+        ktop[ktozad[i]]++;
+    }
+ }
+ int maks=0;
+ for(int i=0; i<m; i++)
+    if(tabm[i]>maks)maks=tabm[i];
+ cout<<maks<<'\n';
+ for(int i=0; i<n; i++){
+        for(int j=0; j<m; j++)
+            cout<<result[i][j]<<' ';
+        cout<<'\n';
+        }
 }
 
 void GeneratePop(){
@@ -181,11 +215,10 @@ void GeneratePop(){
                 int r=rand()%n;
             while (chromosome[j*n+r]!=-1){
             r=rand()%n;
-            //cout<<k<<" chuj\n";
             }
             chromosome[j*n+r]=k;
         }
-  chromosome[n*m]=Time(chromosome);
+  chromosome[n*m]=Time(chromosome); // n*m-ty element przechowuje wynik funkcji celu
   population.push_back(chromosome);
   }
 }
@@ -228,17 +261,12 @@ void GeneticAlgorithm(){
     start=clock();
     srand(time(NULL));
     GeneratePop();
-    //cout<<"ok"<<'\n';
-    //int i=0;
     while(koniec<T)
     {
-        //i++;
-        //cout<<"ok\n";
         int knames[ksize];
         int i=0;
         while(i<ksize)
         {
-            //cout<<"ok\n";
             int temp=Turniej();
             bool czy=false;
             for(int j=0;j<i;j++){
@@ -252,27 +280,21 @@ void GeneticAlgorithm(){
                 i++;
             }
         }
-        for(i=0;i<ksize-1;i++)
+        for(i=0;i<ksize-1;i+=2)
         {
             int* chromosome1=new int[n*m+1];
             int* chromosome2=new int[n*m+1];
-            //cout << "miash\n";
             int miejsce;
-            //cout<<m<<' ';
             miejsce=(rand() % m)*n;
-            //cout<<miejsce<<' ';
             for(int j=0;j<miejsce;j++)
             {
                 chromosome1[j]=population[knames[i]][j];
                 chromosome2[j]=population[knames[i+1]][j];
-                //j++;
             }
-            //cout<<"spoko";
             for(int j=miejsce;j<n*m;j++)
             {
                 chromosome1[j]=population[knames[i+1]][j];
                 chromosome2[j]=population[knames[i]][j];
-                //j++;
             }
             int mut=rand()%100;
             if(mut>=czymut)
@@ -285,19 +307,14 @@ void GeneticAlgorithm(){
             population.push_back(chromosome1);
             population.push_back(chromosome2);
         }
-        //cout<<"spoko";
         sort(population.begin(), population.end(), comp);
-        //Wyswietl();
-        //cout << Time(population[0]) << endl;
         for(int i=population_size; i<population.size(); i++)
             delete(population[i]);
         population.erase(population.begin()+population_size,population.end());
         koniec=clock()-start;
 
-        //cout << koniec;
     }
-    cout << Time(population[0]) << endl;
-    //cout<<i<<'\n';
+    Result(population[0]);
 }
 
 void ZapiszWynik(char* a){
@@ -323,16 +340,6 @@ int main(int argc, char* argv[]){
     else{
         cout<<"Nie ma parametru\n";
     }
-
     //ZapiszWynik(argv[1]);
-
-    /*srand(time(NULL));
-    Read1();
-    GeneratePop();
-    sort(population.begin(), population.end(), comp);
-    Wyswietl();*/
- //GeneticAlgorithm();
-
-
  return 0;
 }
