@@ -1,0 +1,4 @@
+Najlepsza populacja to: 20
+Najlepsza mutacja to: 40
+Najlepsza ilosc graczy turnijowych to: 2
+Najlepsza il krzyzowanych chromosomow to: 10

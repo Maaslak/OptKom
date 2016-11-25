@@ -9,11 +9,11 @@
 
 using namespace std;
 
-const int population_size=20;
+const int T=18000;
 int n,m; //n - liczba operacji, m - liczba maszyn
 vector <int*> population;
 int** machines,** optime;
-const int T=6000, tsize=10, ksize=4, czymut=60;
+const int population_size=20, tsize=2, ksize=10, czymut=40;
 int start,koniec;
 bool czyTailard=0;
 
@@ -257,8 +257,9 @@ chr[gdziemasz*n+a]=chr[gdziemasz*n+b];
 chr[gdziemasz*n+b]=temp;
 }
 
-void GeneticAlgorithm(){
+int GeneticAlgorithm(){ //Zwraca czas wygranego chromosomu
     start=clock();
+    koniec=clock()-start;
     srand(time(NULL));
     GeneratePop();
     while(koniec<T)
@@ -315,6 +316,9 @@ void GeneticAlgorithm(){
 
     }
     Result(population[0]);
+    int czas=population[0][n*m];
+    //cout<<czas<<'\n';
+    return czas;
 }
 
 void ZapiszWynik(char* a){
@@ -324,8 +328,8 @@ void ZapiszWynik(char* a){
     plik.close();
 }
 
-int main(int argc, char* argv[]){
-    if(argc>1){
+int CzytajPlik(int argc, char* argv[]){ //zwraca najlepszy wynik
+ if(argc>1){
         if(argv[1][0]=='t' && argv[1][1]=='a' && argv[1][2]=='i')
         {
             //cout << "Weszlem";
@@ -334,12 +338,136 @@ int main(int argc, char* argv[]){
         }
         else
             ReadBeasley(argv[1]);
-    GeneticAlgorithm();
+    int wyn=GeneticAlgorithm();
+    //cout<<population.size()<<' ';
     Delete1();
+    return wyn;
     }
     else{
         cout<<"Nie ma parametru\n";
     }
+}
+
+void Tuning(){
+ int popsize[10]={16, 20, 33, 44, 50, 75, 80, 100, 125, 150};
+ int szansawystmut[10]={10, 20 ,30, 40, 50, 60, 70, 75, 80, 90};
+ int ilturniej[10]={4, 6, 8, 10, 12, 14, 16, 20, 25, 30};
+ int krzyz[10]={5, 10, 13, 16, 20, 25, 30, 40, 45, 50};
+ char* inst[]={"abz5.txt", "ft06.txt", "ft20.txt", "la01.txt", "la11.txt", "la20.txt", "la40.txt", "orb10.txt", "swv14.txt", "yn2.txt"};
+ bool openable=true;
+ int i;
+long ocena[10];
+ fstream fd[10], Wtuning;
+ Wtuning.open("Wtuning.txt", ios_base::out | ios_base::app);
+ for(i=0; i< 10; i++){
+        fd[i].open(inst[i], ios_base::in);
+        if(!fd[i].good()){
+         openable=false;
+        break;
+        }
+        }
+ //Wtuning<<"Start\n";
+ /*
+ if(!openable){
+  cout<<"Nie udalo sie otworzyc pliku: "<<inst[i]<<'\n';
+ }
+
+ for(int i=0; i<10; i++)
+    ocena[i]=0;
+ for(int i=0; i<10; i++){
+  cout<<"Sprawdzam pop: "<<i<<'\n';
+  population_size=popsize[i];
+  czymut=szansawystmut[4];
+  tsize=ilturniej[6]*population_size/100;
+  ksize=krzyz[6]*population_size/100;
+  for(int j=0; j<10; j++){
+    char* argv[]={"Test", inst[j]};
+    ocena[i]+=CzytajPlik(2, argv);
+    cout<<"Ocena: "<<ocena[i]<<'\n';
+  }
+ }
+ int najpop=0;
+ for(int i=1; i<10; i++)
+    if(ocena[i]<ocena[najpop])najpop=i;
+ Wtuning<<"Najlepsza populacja to: "<<popsize[najpop];
+
+
+
+ for(int i=0; i<10; i++)
+    ocena[i]=0;
+ for(int i=0; i<10; i++){
+  cout<<"Sprawdzam mut: "<<i<<'\n';
+  population_size=popsize[1];
+  czymut=szansawystmut[i];
+  tsize=ilturniej[6]*population_size/100;
+  ksize=krzyz[6]*population_size/100;
+  for(int j=0; j<10; j++)
+    for(int k=0; k<3; k++){
+    char* argv[]={"Test", inst[j]};
+    ocena[i]+=CzytajPlik(2, argv);
+    cout<<"Ocena: "<<ocena[i]<<'\n';
+  }
+ }
+ int najmut=0;
+ for(int i=1; i<10; i++)
+    if(ocena[i]<ocena[najmut])najmut=i;
+ Wtuning<<"Najlepsza mutacja to: "<<szansawystmut[najmut];
+
+
+ for(int i=0; i<10; i++)
+    ocena[i]=0;
+ for(int i=0; i<10; i++){
+  cout<<"Sprawdzam il turniej: "<<i<<'\n';
+  population_size=popsize[1];
+  czymut=40; // <--- Tu wpisz liczbę
+  tsize=ilturniej[i]*population_size/50;
+  cout<<tsize;
+  ksize=krzyz[6]*population_size/100;
+  for(int j=0; j<10; j++)
+    for(int k=0; k<3; k++){
+    char* argv[]={"Test", inst[j]};
+    ocena[i]+=CzytajPlik(2, argv);
+    cout<<"Ocena: "<<ocena[i]<<'\n';
+  }
+ }
+ int najtur=0;
+ for(int i=1; i<10; i++)
+    if(ocena[i]<ocena[najtur])najtur=i;
+ Wtuning<<"Najlepsza ilosc graczy turnijowych to: "<<ilturniej[najtur]*population_size/50;
+
+
+
+ for(int i=0; i<10; i++)
+    ocena[i]=0;
+ for(int i=0; i<10; i++){
+  cout<<"Sprawdzam il krzyzowac: "<<i<<'\n';
+  population_size=20;
+  czymut=40;
+  tsize=2;
+  ksize=krzyz[i]*population_size/50;
+  for(int j=0; j<10; j++)
+    for(int k=0; k<3; k++){
+    char* argv[]={"Test", inst[j]};
+    ocena[i]+=CzytajPlik(2, argv);
+    cout<<"Ocena: "<<ocena[i]<<'\n';
+  }
+ }
+ int najkrz=0;
+ for(int i=1; i<10; i++)
+    if(ocena[i]<ocena[najkrz])najkrz=i;
+ Wtuning<<"Najlepsza il krzyzowanych chromosomow to: "<<krzyz[najkrz]*population_size/50;
+
+*/
+
+ for(int i=0; i<10; i++)
+    fd[i].close();
+ Wtuning.close();
+}
+
+int main(int argc, char* argv[]){
+    //Tuning();
+    CzytajPlik(argc, argv);
+
     //ZapiszWynik(argv[1]);
  return 0;
 }
